@@ -4,9 +4,15 @@ const { z } = require("zod");
 const tools = {
   getStudent,getAttendance
 };
-const getStudentSchema = z.object({
-  id: z.number().int().positive()
-});
+const schemas = {
+  getStudent: z.object({
+    id: z.number().int().positive()
+  }),
+
+  getAttendance: z.object({
+    studentId: z.number().int().positive()
+  })
+};
 
 async function executeTool(functionCall) {
   const toolName = functionCall.name;
@@ -18,17 +24,22 @@ async function executeTool(functionCall) {
     throw new Error(`Unknown tool: ${toolName}`);
   }
 
-  const validation = getStudentSchema.safeParse(args);
+  const schema = schemas[toolName];
+
+  const validation = schema.safeParse(args);
 
   if (!validation.success) {
     throw new Error("Invalid tool arguments");
   }
 
-  const result = await selectedTool(validation.data.id);
+  if (toolName === "getStudent") {
+    return await selectedTool(validation.data.id);
+  }
 
-  return result;
+  if (toolName === "getAttendance") {
+    return await selectedTool(validation.data.studentId);
+  }
 }
-
 async function handleToolCall(functionCall) {
   console.log("AI requested tool:", functionCall.name);
   console.log("Arguments:", functionCall.args);
@@ -60,5 +71,19 @@ async function main() {
 
 
 main();
+async function main() {
+  const functionCall = {
+    name: "getAttendance",
+    args: {
+      studentId: 1
+    }
+  };
 
+  const result = await executeTool(functionCall);
+
+  console.log("Tool:", functionCall.name);
+  console.log("Result:", result);
+}
+
+main();
 
