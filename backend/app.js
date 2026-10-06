@@ -1,16 +1,16 @@
  const express=require("express")
-const pool=require("./db")
+const {getStudent,pool}=require("./db")
 
 const app=express();
 
-app.get("/test-db",async (req,res)=>{
+app.get("/student/:id",async (req,res)=>{
     try{
-        const response=await pool.query("select * from students")
-        res.json(response.rows)
+       const student=await getStudent(req.params.id)
+        res.json(student)
     }catch (error) {
     console.error(error);
     res.status(500).json({
-      error: "Database connection failed",
+      error: "Database error",
     });
   }
 })

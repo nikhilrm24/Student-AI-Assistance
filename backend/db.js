@@ -8,4 +8,10 @@ const pool = new Pool({
   port: 5433,
 });
 
-module.exports = pool;
+async function getStudent(id) {
+    const result=await pool.query(`select * from students where id=$1`,[id])
+     return result.rows[0];
+}
+
+
+module.exports = {pool,getStudent};
