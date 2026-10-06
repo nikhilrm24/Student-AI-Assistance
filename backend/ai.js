@@ -29,19 +29,34 @@ async function executeTool(functionCall) {
   return result;
 }
 
-async function main() {
- 
-  const functionCall = {
-    name: "getStudent",
-    args: {
-      id: 2
-    }
-  };
+async function handleToolCall(functionCall) {
+  console.log("AI requested tool:", functionCall.name);
+  console.log("Arguments:", functionCall.args);
 
   const result = await executeTool(functionCall);
 
-  console.log("Tool:", functionCall.name);
-  console.log("Result:", result);
+  console.log("Database result:", result);
+
+  return {
+    tool: functionCall.name,
+    result
+  };
 }
+
+async function main() {
+  const functionCall = {
+    name: "getStudent",
+    args: {
+      id: 1
+    }
+  };
+
+  const toolResponse = await handleToolCall(functionCall);
+
+  console.log("Tool response:");
+  console.log(toolResponse);
+}
+
+main();
 
 main();
