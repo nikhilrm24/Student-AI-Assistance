@@ -1,8 +1,8 @@
-const { getStudent } = require("./db");
+const { getStudent,getAttendance} = require("./db");
 const { z } = require("zod");
 
 const tools = {
-  getStudent
+  getStudent,getAttendance
 };
 const getStudentSchema = z.object({
   id: z.number().int().positive()
@@ -57,6 +57,8 @@ async function main() {
   console.log(toolResponse);
 }
 
-main();
+
 
 main();
+
+
