@@ -1,7 +1,7 @@
 const getStudentTool = {
   name: "getStudent",
-
-  description: "Get a student's basic information from the database using their student ID.",
+  description:
+    "Get a student's basic information from the database using their student ID.",
 
   parameters: {
     type: "object",
@@ -15,11 +15,10 @@ const getStudentTool = {
   }
 };
 
-
 const getAttendanceTool = {
   name: "getAttendance",
-
-  description: "Get a student's attendance for all subjects using their student ID.",
+  description:
+    "Get a student's attendance for all subjects using their student ID.",
 
   parameters: {
     type: "object",
@@ -32,7 +31,6 @@ const getAttendanceTool = {
     required: ["studentId"]
   }
 };
-
 
 module.exports = {
   getStudentTool,

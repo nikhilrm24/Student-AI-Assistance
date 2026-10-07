@@ -1,9 +1,50 @@
-const { getStudent,getAttendance} = require("./db");
+require("dotenv").config();
+
+const { GoogleGenAI } = require("@google/genai");
 const { z } = require("zod");
 
+const {
+  getStudent,
+  getAttendance
+} = require("./db");
+
+const {
+  getStudentTool,
+  getAttendanceTool
+} = require("./getAttendanceTool");
+
+
+
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
+
+const chat = ai.chats.create({
+  model: "gemini-3.6-flash",
+
+  config: {
+    tools: [
+      {
+        functionDeclarations: [
+          getStudentTool,
+          getAttendanceTool
+        ]
+      }
+    ]
+  }
+});
+
+
+
+
 const tools = {
-  getStudent,getAttendance
+  getStudent,
+  getAttendance
 };
+
+
+
 const schemas = {
   getStudent: z.object({
     id: z.number().int().positive()
@@ -14,7 +55,10 @@ const schemas = {
   })
 };
 
+
+
 async function executeTool(functionCall) {
+
   const toolName = functionCall.name;
   const args = functionCall.args;
 
@@ -40,8 +84,13 @@ async function executeTool(functionCall) {
     return await selectedTool(validation.data.studentId);
   }
 }
-async function handleToolCall(functionCall) {
-  console.log("AI requested tool:", functionCall.name);
+
+
+
+async function processToolCall(functionCall) {
+
+  console.log("AI requested:", functionCall.name);
+
   console.log("Arguments:", functionCall.args);
 
   const result = await executeTool(functionCall);
@@ -49,41 +98,42 @@ async function handleToolCall(functionCall) {
   console.log("Database result:", result);
 
   return {
-    tool: functionCall.name,
+    name: functionCall.name,
     result
   };
 }
 
 async function main() {
-  const functionCall = {
-    name: "getStudent",
-    args: {
-      id: 1
-    }
-  };
 
-  const toolResponse = await handleToolCall(functionCall);
+  const response = await chat.sendMessage({
+    message: "Give me the details of student with ID 1."
+  });
 
-  console.log("Tool response:");
+  const functionCall = response.functionCalls?.[0];
+
+  if (!functionCall) {
+    console.log("AI:", response.text);
+    return;
+  }
+
+
+  const toolResponse = await processToolCall(functionCall);
+
+  console.log("\nTool response:");
   console.log(toolResponse);
-}
 
 
-
-main();
-async function main() {
-  const functionCall = {
-    name: "getAttendance",
-    args: {
-      studentId: 1
+  const finalResponse = await chat.sendMessage({
+    message: {
+      functionResponse: {
+        name: toolResponse.name,
+        response: toolResponse.result
+      }
     }
-  };
+  });
 
-  const result = await executeTool(functionCall);
-
-  console.log("Tool:", functionCall.name);
-  console.log("Result:", result);
+  console.log("\nFinal AI response:");
+  console.log(finalResponse.text);
 }
 
 main();
-
