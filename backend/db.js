@@ -21,5 +21,11 @@ async function getAttendance(studentId) {
   return result.rows;
 }
 
+async function findStudentByName(name){
+  const result=await pool.query(
+    "select * from students where lower(name)=lower($1)",[name]
+  );
+  return result.rows[0];
+}
 
-module.exports = {pool,getStudent,getAttendance};
+module.exports = {pool,getStudent,getAttendance,findStudentByName};
